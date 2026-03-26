@@ -1,1 +1,426 @@
 # Neurology
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Explorer — Junior Neurology Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f2ff;
+  --muted: #8890b0;
+  --accent: #b06cff;
+  --accent2: #ff6b9d;
+  --accent3: #43dfb4;
+  --accent4: #ffd166;
+  --success: #43dfb4;
+  --danger: #ff6b9d;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 10%, rgba(176,108,255,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 300px at 80% 80%, rgba(67,223,180,0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 60% 30%, rgba(255,107,157,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.wrapper { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+.header { text-align: center; margin-bottom: 2rem; }
+.lab-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(176,108,255,0.12);
+  border: 1px solid rgba(176,108,255,0.3);
+  border-radius: 30px; padding: 6px 16px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 14px;
+}
+.lab-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+h1 { font-size: 32px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
+h1 span { color: var(--accent); }
+.tagline { color: var(--muted); font-size: 15px; margin-bottom: 1.2rem; }
+
+.xp-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; max-width: 360px; margin: 0 auto; }
+.xp-icon { font-size: 18px; }
+.xp-info { flex: 1; }
+.xp-level { font-size: 12px; font-weight: 700; color: var(--accent4); text-transform: uppercase; letter-spacing: 0.06em; }
+.xp-track { height: 6px; background: var(--surface2); border-radius: 10px; margin-top: 4px; overflow: hidden; }
+.xp-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.6s ease; }
+.xp-count { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+.nav { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin: 1.5rem 0; }
+.nav-btn {
+  padding: 10px 6px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; text-align: center;
+}
+.nav-btn:hover { border-color: rgba(176,108,255,0.4); color: var(--text); background: var(--surface2); }
+.nav-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.nav-btn .nav-icon { display: block; font-size: 18px; margin-bottom: 4px; }
+
+.section { display: none; animation: fadeIn 0.3s ease; }
+.section.visible { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ANATOMY */
+.anatomy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.part-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 10px;
+  cursor: pointer; text-align: center; transition: all 0.2s; color: var(--text);
+}
+.part-btn:hover { border-color: rgba(176,108,255,0.5); background: var(--surface2); transform: translateY(-2px); }
+.part-btn.active { border-color: var(--accent); background: rgba(176,108,255,0.12); }
+.part-btn .p-icon { font-size: 26px; margin-bottom: 6px; }
+.part-btn .p-name { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+.part-btn .p-hint { font-size: 11px; color: var(--muted); }
+
+.detail-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem; min-height: 100px; transition: all 0.3s;
+}
+.detail-panel .dp-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; color: var(--accent); }
+.detail-panel .dp-body { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+.detail-panel .dp-wow {
+  font-size: 13px; color: var(--accent3);
+  background: rgba(67,223,180,0.08); border-left: 3px solid var(--accent3);
+  border-radius: 0 8px 8px 0; padding: 8px 12px; line-height: 1.5;
+}
+.detail-panel .placeholder { color: var(--muted); font-size: 14px; }
+
+/* QUIZ */
+.q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.q-progress { font-size: 13px; color: var(--muted); font-family: 'Space Mono', monospace; }
+.q-score-badge { background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700; color: var(--accent4); }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+.q-text { font-size: 16px; font-weight: 700; line-height: 1.5; margin-bottom: 1.2rem; }
+.opts { display: grid; gap: 9px; }
+.opt {
+  padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--surface2);
+  color: var(--text); font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  text-align: left; transition: all 0.15s;
+}
+.opt:hover:not(:disabled) { border-color: rgba(176,108,255,0.5); background: rgba(176,108,255,0.08); }
+.opt.correct { background: rgba(67,223,180,0.12); border-color: var(--success); color: var(--success); }
+.opt.wrong { background: rgba(255,107,157,0.12); border-color: var(--danger); color: var(--danger); }
+.expl { margin-top: 12px; padding: 12px 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-sm); font-size: 13px; color: var(--muted); line-height: 1.65; }
+.next-btn {
+  margin-top: 12px; padding: 11px 24px; border-radius: var(--radius-sm);
+  background: var(--accent); border: none; color: #fff;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all 0.15s;
+}
+.next-btn:hover { background: #9a55f0; transform: translateY(-1px); }
+.score-card { text-align: center; padding: 2.5rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.score-big { font-size: 52px; font-weight: 900; color: var(--accent); }
+.score-sub { font-size: 16px; color: var(--muted); margin: 8px 0 20px; line-height: 1.5; }
+.restart-btn {
+  padding: 12px 28px; background: var(--accent2); border: none;
+  border-radius: var(--radius-sm); color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.15s;
+}
+.restart-btn:hover { transform: translateY(-2px); }
+
+/* CASES */
+.cases-list { display: grid; gap: 12px; }
+.case-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem; cursor: pointer; transition: all 0.2s;
+}
+.case-card:hover { border-color: rgba(176,108,255,0.4); transform: translateY(-2px); }
+.case-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.case-title { font-size: 15px; font-weight: 800; }
+.diff-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.diff-badge.easy { background: rgba(67,223,180,0.15); color: var(--success); }
+.diff-badge.medium { background: rgba(255,209,102,0.15); color: var(--accent4); }
+.diff-badge.hard { background: rgba(255,107,157,0.15); color: var(--danger); }
+.case-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.case-arrow { color: var(--accent); font-size: 18px; margin-top: 8px; display: block; text-align: right; }
+.back-btn { background: none; border: none; color: var(--muted); font-family: 'Nunito', sans-serif; font-size: 14px; cursor: pointer; padding: 0; margin-bottom: 1rem; }
+.back-btn:hover { color: var(--text); }
+.scenario-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+.diag-q { font-size: 15px; font-weight: 800; margin-bottom: 12px; }
+.result-box { margin-top: 14px; padding: 14px; border-radius: var(--radius-sm); font-size: 14px; line-height: 1.65; }
+.result-box.correct { background: rgba(67,223,180,0.1); border: 1px solid rgba(67,223,180,0.3); color: var(--success); }
+.result-box.wrong { background: rgba(255,107,157,0.1); border: 1px solid rgba(255,107,157,0.3); color: #ff9fc0; }
+
+/* FACTS */
+.facts-grid { display: grid; gap: 12px; }
+.fact-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem; transition: all 0.2s;
+}
+.fact-card:hover { border-color: rgba(176,108,255,0.3); }
+.fact-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.fact-body { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; }
+.fact-amazing { font-size: 13px; color: var(--accent4); font-style: italic; }
+
+@media(max-width:480px) {
+  h1{font-size:26px} .nav{grid-template-columns:repeat(2,1fr)} .anatomy-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div class="lab-badge"><span class="dot"></span> Junior Neurology Lab</div>
+    <h1>Brain <span>Explorer</span></h1>
+    <p class="tagline">Learn how the brain and nervous system work — just like a real neurologist</p>
+    <div class="xp-wrap">
+      <div class="xp-icon">🧬</div>
+      <div class="xp-info">
+        <div class="xp-level" id="xpLevel">Level 1 — Intern</div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      </div>
+      <div class="xp-count" id="xpCount">0 XP</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="show('anatomy',this)"><span class="nav-icon">🧠</span>Anatomy</button>
+    <button class="nav-btn" onclick="show('quiz',this)"><span class="nav-icon">⚡</span>Quiz</button>
+    <button class="nav-btn" onclick="show('cases',this)"><span class="nav-icon">🩺</span>Cases</button>
+    <button class="nav-btn" onclick="show('facts',this)"><span class="nav-icon">💡</span>Facts</button>
+  </div>
+
+  <!-- ANATOMY -->
+  <div class="section visible" id="anatomy">
+    <div class="anatomy-grid" id="partGrid"></div>
+    <div class="detail-panel" id="partDetail"><p class="placeholder">Tap any part above to learn what it does →</p></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section" id="quiz">
+    <div class="q-header">
+      <div class="q-progress" id="qProgress">Question 1 of 10</div>
+      <div class="q-score-badge" id="qScoreBadge">Score: 0</div>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+
+  <!-- CASES -->
+  <div class="section" id="cases"><div id="caseArea"></div></div>
+
+  <!-- FACTS -->
+  <div class="section" id="facts"><div class="facts-grid" id="factsGrid"></div></div>
+</div>
+
+<script>
+var xp=0, seen=new Set();
+var levels=["Intern","Junior Doctor","Resident","Fellow","Neurologist!"];
+function addXP(n){
+  xp=Math.min(xp+n,500);
+  var lvl=Math.min(Math.floor(xp/100),levels.length-1);
+  var pct=(xp%100);
+  document.getElementById('xpFill').style.width=pct+'%';
+  document.getElementById('xpLevel').textContent='Level '+(lvl+1)+' — '+levels[lvl];
+  document.getElementById('xpCount').textContent=xp+' XP';
+}
+
+function show(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='quiz') renderQuiz();
+  if(id==='cases') renderCaseList();
+  if(id==='facts') renderFacts();
+}
+
+// ANATOMY DATA
+var parts=[
+  {icon:'🧠',name:'Cerebrum',hint:'The thinking brain',desc:'The cerebrum is the largest part of the brain, making up about 85% of its total weight. It is split into two halves called hemispheres — left and right. It is responsible for all your conscious thoughts, memories, language, movement, and personality. The outer layer, the cortex, is deeply folded to pack in as much surface area as possible.',wow:'If you unfolded and flattened the cerebral cortex, it would be about the size of a pillowcase — roughly 2,500 cm²!'},
+  {icon:'🎯',name:'Frontal lobe',hint:'Decisions & personality',desc:'The frontal lobe sits at the very front of your brain, just behind your forehead. It controls decision-making, planning, problem-solving, and your personality. It also contains the motor cortex, which sends signals to your muscles to move. The frontal lobe is the last brain region to fully develop — it finishes maturing around age 25!',wow:'Damage to the frontal lobe can completely change someone\'s personality. A famous 1848 case: Phineas Gage had a metal rod blast through his frontal lobe and survived, but became a completely different person.'},
+  {icon:'🎵',name:'Temporal lobe',hint:'Sound & memory',desc:'The temporal lobe sits on the sides of the brain, near your ears. It processes sound, helping you understand speech and music. It also contains the hippocampus — the brain\'s memory storage system. When you learn something new, the hippocampus helps turn short-term memories into long-term ones.',wow:'The hippocampus gets its name from the Greek word for seahorse — because it looks like one when viewed from the side!'},
+  {icon:'👁️',name:'Occipital lobe',hint:'Vision centre',desc:'The occipital lobe is at the very back of your brain. Despite your eyes being at the front of your head, all the visual information they collect is sent all the way to the back for processing! It handles colour, shape, motion, and depth — assembling everything you see into one clear picture.',wow:'About 30% of the entire cerebral cortex is dedicated to processing vision — more than any other sense.'},
+  {icon:'✋',name:'Parietal lobe',hint:'Touch & space',desc:'The parietal lobe sits at the top and back of the brain. It processes touch, pressure, temperature, and pain signals from your body. It also handles spatial awareness — helping you know where your body is in space, navigate your surroundings, and do maths and reading.',wow:'The parietal lobe contains a "body map" called the homunculus — a tiny imaginary figure where each body part is represented according to how sensitive it is. Hands and lips are enormous; the back is tiny.'},
+  {icon:'🏃',name:'Cerebellum',hint:'Balance & coordination',desc:'The cerebellum (Latin for "little brain") sits at the base of the brain at the back. It contains over half of all neurons in the entire brain! It fine-tunes movement, balance, and coordination. When you ride a bike, catch a ball, or write your name, the cerebellum is making tiny adjustments every millisecond to keep it smooth.',wow:'The cerebellum has more neurons than the rest of the brain combined — about 69 billion out of 86 billion total.'},
+  {icon:'🌉',name:'Brain stem',hint:'Life support centre',desc:'The brain stem connects the brain to the spinal cord. It controls all the vital automatic functions that keep you alive — breathing, heart rate, blood pressure, and swallowing. It never sleeps! Even when you are in a deep sleep, your brain stem is quietly keeping everything running without you having to think about it.',wow:'The brain stem is evolutionarily the oldest part of the brain, sometimes called the "reptilian brain" because even lizards have one.'},
+  {icon:'⚡',name:'Neuron',hint:'The brain\'s messenger',desc:'Neurons are the basic building blocks of the entire nervous system. They are specialised cells that carry electrical signals called impulses. Each neuron has a cell body, branching dendrites that receive signals, and a long axon that sends signals to the next neuron. Neurons communicate at tiny gaps called synapses, using chemical messengers called neurotransmitters.',wow:'You have about 86 billion neurons, and each one can connect to up to 10,000 others — creating 100 trillion possible connections!'},
+  {icon:'🛡️',name:'Myelin',hint:'The speed coating',desc:'Many axons are wrapped in a fatty white coating called myelin, made by special support cells. Myelin acts like insulation on an electrical wire — it speeds up signal transmission massively and prevents signals from leaking away. This is why the brain\'s "wiring" is often called white matter.',wow:'Myelinated signals travel at up to 120 metres per second — that\'s about 430 km/h. Unmyelinated fibres travel at just 0.5–2 m/s.'},
+  {icon:'🧪',name:'Neurotransmitter',hint:'Chemical messenger',desc:'When an electrical signal reaches the end of a neuron, it triggers the release of chemical messengers called neurotransmitters across the synapse. Different neurotransmitters have different jobs: dopamine is linked to reward and pleasure, serotonin to mood and sleep, acetylcholine to muscle movement and memory, and GABA to calming the brain down.',wow:'Many medicines and drugs work by mimicking, blocking, or changing the levels of specific neurotransmitters in the brain.'},
+];
+
+var selPart=null;
+var grid=document.getElementById('partGrid');
+parts.forEach((p,i)=>{
+  var d=document.createElement('div');
+  d.className='part-btn';
+  d.innerHTML=`<div class="p-icon">${p.icon}</div><div class="p-name">${p.name}</div><div class="p-hint">${p.hint}</div>`;
+  d.onclick=()=>{
+    document.querySelectorAll('.part-btn').forEach(b=>b.classList.remove('active'));
+    d.classList.add('active');
+    document.getElementById('partDetail').innerHTML=`<div class="dp-title">${p.name}</div><div class="dp-body">${p.desc}</div><div class="dp-wow">Did you know: ${p.wow}</div>`;
+    if(!seen.has('p'+i)){seen.add('p'+i);addXP(5);}
+  };
+  grid.appendChild(d);
+});
+
+// QUIZ DATA
+var questions=[
+  {q:'What is the largest part of the human brain?',opts:['Cerebellum','Brain stem','Cerebrum','Thalamus'],ans:2,exp:'The cerebrum makes up about 85% of the brain\'s total weight. It is responsible for thinking, memory, language, personality, and voluntary movement. It\'s split into a left and right hemisphere.'},
+  {q:'What is the basic building block cell of the nervous system called?',opts:['Nephron','Neuron','Nucleon','Nociceptor'],ans:1,exp:'Neurons are specialised cells that carry electrical signals throughout the brain and body. You have about 86 billion of them! They communicate with each other at junctions called synapses.'},
+  {q:'Which part of the brain controls balance and coordination?',opts:['Frontal lobe','Cerebellum','Occipital lobe','Brain stem'],ans:1,exp:'The cerebellum, at the base of the brain, fine-tunes all your movements and keeps you balanced. It\'s constantly making tiny adjustments — every time you walk, write, or catch a ball.'},
+  {q:'What do we call the chemical messengers that neurons use to communicate?',opts:['Hormones','Enzymes','Neurotransmitters','Antibodies'],ans:2,exp:'Neurotransmitters are chemicals released at synapses to pass signals between neurons. Famous ones include dopamine (reward), serotonin (mood), and acetylcholine (movement and memory).'},
+  {q:'Which lobe of the brain is mainly responsible for processing vision?',opts:['Frontal lobe','Parietal lobe','Temporal lobe','Occipital lobe'],ans:3,exp:'The occipital lobe at the back of the brain processes all visual information. Even though your eyes are at the front of your head, the signals travel all the way to the back to be decoded into what you see!'},
+  {q:'What is the fatty coating around nerve fibres that speeds up signals?',opts:['Melanin','Keratin','Myelin','Collagen'],ans:2,exp:'Myelin is a white fatty sheath that wraps around axons like insulation on an electrical wire. It makes signals travel up to 100 times faster. Diseases like multiple sclerosis (MS) damage the myelin sheath.'},
+  {q:'The hippocampus is mainly responsible for which function?',opts:['Breathing','Memory formation','Colour vision','Heart rate'],ans:1,exp:'The hippocampus, tucked inside the temporal lobe, is crucial for converting short-term memories into long-term ones. It is named after the Greek word for seahorse — because that\'s what it looks like!'},
+  {q:'Which part of the brain keeps you breathing even while you sleep?',opts:['Cerebrum','Frontal lobe','Cerebellum','Brain stem'],ans:3,exp:'The brain stem controls all automatic vital functions — breathing, heart rate, blood pressure, and swallowing. It never switches off, working continuously to keep you alive without any conscious effort.'},
+  {q:'About how many neurons does the human brain contain?',opts:['1 million','86 million','86 billion','1 trillion'],ans:2,exp:'The human brain contains approximately 86 billion neurons. Each neuron can form up to 10,000 connections with others, giving the brain an almost unimaginable 100 trillion possible connections!'},
+  {q:'A doctor who specialises in brain and nervous system diseases is called a...?',opts:['Cardiologist','Nephrologist','Neurologist','Endocrinologist'],ans:2,exp:'A neurologist specialises in diagnosing and treating diseases of the brain, spinal cord, and nerves. The word comes from "neuron" (Greek for nerve/sinew). They treat conditions like epilepsy, stroke, Parkinson\'s, and migraines.'},
+];
+
+var qi=0,qs=0,answered=false;
+function renderQuiz(){
+  if(qi>=questions.length){
+    var pct=Math.round(qs/questions.length*100);
+    var msg=pct>=90?'Outstanding, future neurologist!':pct>=70?'Great work — keep exploring!':'Keep learning and try again!';
+    document.getElementById('quizArea').innerHTML=`<div class="score-card"><div class="score-big">${pct}%</div><div class="score-sub">You got ${qs} out of ${questions.length} right!<br>${msg}</div><button class="restart-btn" onclick="restartQ()">Try again ↺</button></div>`;
+    return;
+  }
+  var q=questions[qi];
+  document.getElementById('qProgress').textContent=`Question ${qi+1} of ${questions.length}`;
+  document.getElementById('qScoreBadge').textContent=`Score: ${qs}`;
+  var html=`<div class="q-card"><div class="q-text">${q.q}</div><div class="opts">`;
+  q.opts.forEach((o,i)=>html+=`<button class="opt" id="o${i}" onclick="ansQ(${i})">${o}</button>`);
+  html+=`</div><div id="expl"></div></div>`;
+  document.getElementById('quizArea').innerHTML=html;
+  answered=false;
+}
+function ansQ(i){
+  if(answered)return; answered=true;
+  var q=questions[qi];
+  document.querySelectorAll('.opt').forEach(o=>o.disabled=true);
+  document.getElementById('o'+q.ans).classList.add('correct');
+  if(i!==q.ans) document.getElementById('o'+i).classList.add('wrong');
+  else{qs++;addXP(10);}
+  document.getElementById('expl').innerHTML=`<div class="expl">${q.exp}</div><button class="next-btn" onclick="nextQ()">${qi<questions.length-1?'Next question →':'See my score →'}</button>`;
+}
+function nextQ(){qi++;renderQuiz();}
+function restartQ(){qi=0;qs=0;renderQuiz();}
+
+// CASES
+var cases=[
+  {
+    title:'The headache and blurry vision',
+    badge:'easy',level:'Easy',
+    desc:'An 11-year-old gets severe headaches every few weeks with flashing lights before them.',
+    scenario:'Sofia, age 11, has been getting very bad headaches every few weeks. Before each headache, she sees zigzag flashing lights for about 20 minutes. The headaches are on one side of her head, make her feel sick, and last for hours. Loud noise and bright light make them worse. Her mum gets similar headaches.',
+    q:'What is the most likely diagnosis?',
+    opts:['Brain tumour','Migraine with aura','Meningitis','Epilepsy'],
+    ans:1,
+    fb:'Correct! The zigzag lights before the headache are called an "aura" — a classic warning sign of migraine. Migraines are very common and often run in families. Neurologists treat them with lifestyle changes, pain relief, and preventive medicines. The good news: many children outgrow their migraines!'
+  },
+  {
+    title:'Sudden shaking episode',
+    badge:'easy',level:'Easy',
+    desc:'A 10-year-old had a sudden episode of uncontrolled shaking that lasted 2 minutes.',
+    scenario:'James, age 10, suddenly collapsed in the school playground. His body shook rhythmically for about 2 minutes. He was unresponsive during the episode, bit his tongue, and afterwards was very tired and confused. He had no memory of it happening. This is the second episode in 3 months.',
+    q:'What should the neurologist investigate first?',
+    opts:['Broken bone','Epileptic seizure','Allergic reaction','Stroke'],
+    ans:1,
+    fb:'Correct! These are classic features of a tonic-clonic (grand mal) seizure — a type of epilepsy. Epilepsy is a condition where the brain\'s electrical signals occasionally fire abnormally all at once. An EEG (electroencephalogram) records brain electrical activity to help confirm the diagnosis. Many children with epilepsy are fully controlled with medication.'
+  },
+  {
+    title:'The drooping face',
+    badge:'medium',level:'Medium',
+    desc:'A 45-year-old woke up with one side of their face drooping and arm weakness.',
+    scenario:'Mr Okafor, 45, woke up at 7am unable to move his right arm and with his face drooping on the right side. His speech is slurred. His wife says he was completely normal when he went to bed. It is now 7:30am. His blood pressure is very high.',
+    q:'What is happening and what must happen immediately?',
+    opts:['He is having a panic attack — give him water','He is having a stroke — rush to hospital NOW','He has Bell\'s palsy — see the GP next week','He has a migraine — rest in a dark room'],
+    ans:1,
+    fb:'Absolutely right — this is a stroke emergency! The FAST test: Face drooping, Arm weakness, Speech difficulty, Time to call for help immediately. Strokes happen when blood supply to part of the brain is cut off. Brain cells die within minutes without blood. A clot-busting drug called tPA can reverse damage — but ONLY if given within 4.5 hours. Every minute counts!'
+  },
+  {
+    title:'The trembling grandparent',
+    badge:'hard',level:'Hard',
+    desc:'A 68-year-old has a slow resting hand tremor, stiff movements, and a shuffling walk.',
+    scenario:'Grandma Adaeze, 68, has gradually developed a tremor in her right hand that is worst when she\'s resting and improves when she reaches for something. She moves very slowly, her muscles feel stiff, and her handwriting has become tiny. She walks with short shuffling steps and rarely blinks. Symptoms started 3 years ago and are slowly worsening.',
+    q:'Which condition does this pattern most suggest?',
+    opts:['Epilepsy','Alzheimer\'s disease','Parkinson\'s disease','Multiple sclerosis'],
+    ans:2,
+    fb:'Excellent! This is Parkinson\'s disease — a progressive neurological condition where neurons in a brain region called the substantia nigra gradually die, reducing dopamine production. The four hallmarks are: resting tremor, bradykinesia (slow movement), rigidity, and postural instability. A drug called levodopa replaces the missing dopamine and dramatically improves symptoms. Neurologists managing Parkinson\'s is one of the most rewarding parts of the specialty!'
+  },
+];
+
+function renderCaseList(){
+  var html='<div class="cases-list">';
+  cases.forEach((c,i)=>html+=`<div class="case-card" onclick="openCase(${i})"><div class="case-top"><span class="case-title">${c.title}</span><span class="diff-badge ${c.badge}">${c.level}</span></div><div class="case-desc">${c.desc}</div><span class="case-arrow">→</span></div>`);
+  html+='</div>';
+  document.getElementById('caseArea').innerHTML=html;
+}
+
+function openCase(i){
+  var c=cases[i];
+  var html=`<button class="back-btn" onclick="renderCaseList()">← all cases</button>
+    <div class="q-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">${c.title}</span>
+        <span class="diff-badge ${c.badge}">${c.level}</span>
+      </div>
+      <div class="scenario-box">${c.scenario}</div>
+      <div class="diag-q">${c.q}</div>
+      <div class="opts">`;
+  c.opts.forEach((o,j)=>html+=`<button class="opt" id="co${j}" onclick="diagnose(${i},${j})">${o}</button>`);
+  html+=`</div><div id="cResult"></div></div>`;
+  document.getElementById('caseArea').innerHTML=html;
+}
+
+function diagnose(ci,oi){
+  var c=cases[ci];
+  var correct=oi===c.ans;
+  document.querySelectorAll('.opt').forEach(o=>o.disabled=true);
+  document.getElementById('co'+c.ans).classList.add('correct');
+  if(!correct) document.getElementById('co'+oi).classList.add('wrong');
+  if(correct) addXP(20);
+  document.getElementById('cResult').innerHTML=`<div class="result-box ${correct?'correct':'wrong'}">${correct?'✓ Correct! ':'✗ Not quite — '}${c.fb}</div>`;
+}
+
+// FACTS
+var facts=[
+  {tag:'Power consumption',body:'Your brain weighs only about 1.4 kg — just 2% of your body weight — yet it uses about 20% of all the energy your body produces. It runs on glucose and oxygen delivered nonstop by blood.',wow:'If your brain were a lightbulb, it would use about 20 watts — enough to power a dim lamp.'},
+  {tag:'Speed of thought',body:'Electrical signals travel through myelinated nerve fibres at up to 120 metres per second. That is why you feel pain almost instantly when you stub your toe, even though the signal travels from your foot all the way to your brain.',wow:'The fastest nerve signals in your body travel at 432 km/h — faster than a Formula 1 car.'},
+  {tag:'Neuroplasticity',body:'The brain can reorganise and rewire itself — a property called neuroplasticity. When you learn a new skill, you are literally growing new connections between neurons. The brain can even reassign functions to different regions after injury.',wow:'London taxi drivers were found to have a larger hippocampus than average — from memorising thousands of streets!'},
+  {tag:'Sleep and the brain',body:'During sleep, the brain does critical maintenance. It consolidates memories from the day, clears out waste products (including proteins linked to Alzheimer\'s disease), and repairs neural connections. Sleep deprivation impairs the brain faster than almost anything else.',wow:'The brain\'s waste-clearance system (the glymphatic system) is almost 10 times more active during sleep than when awake.'},
+  {tag:'The EEG',body:'An electroencephalogram (EEG) records the brain\'s electrical activity using electrodes placed on the scalp. Neurologists use it to diagnose epilepsy, sleep disorders, and brain injuries. The brain produces different wave patterns depending on what you are doing.',wow:'Hans Berger recorded the first human EEG in 1924. He initially kept it secret for 5 years because he feared nobody would believe him!'},
+  {tag:'Stroke facts',body:'Stroke is the second leading cause of death worldwide and the most common cause of acquired disability. During a stroke, 1.9 million neurons die every minute that treatment is delayed. Time is literally brain.',wow:'The phrase "time is brain" was coined in 1993 and is now the central slogan of stroke emergency medicine globally.'},
+  {tag:'Multiple sclerosis',body:'Multiple sclerosis (MS) is a disease where the immune system mistakenly attacks the myelin sheath around nerve fibres. This disrupts nerve signals and can cause weakness, vision loss, and balance problems. It affects about 2.8 million people worldwide.',wow:'MS is two to three times more common in women than men, and more common in countries further from the equator.'},
+  {tag:'The blood-brain barrier',body:'The brain is surrounded by a highly selective barrier that controls exactly what can pass from the blood into brain tissue. It blocks most bacteria and many drugs — which is why treating brain infections and brain tumours is so challenging for neurologists.',wow:'This barrier is so tight that even many useful drugs have to be specially engineered to cross it.'},
+];
+
+function renderFacts(){
+  var g=document.getElementById('factsGrid');
+  g.innerHTML='';
+  facts.forEach(f=>{
+    var d=document.createElement('div'); d.className='fact-card';
+    d.innerHTML=`<div class="fact-tag">${f.tag}</div><div class="fact-body">${f.body}</div><div class="fact-amazing">Amazing: ${f.wow}</div>`;
+    g.appendChild(d);
+  });
+}
+</script>
+</body>
+</html>
